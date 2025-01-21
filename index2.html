@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bigtable Connect</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            animation: fadeIn 1s ease-in-out;
+            max-width: 600px; /* Limit width for better responsiveness */
+        }
+
+        .header-image {
+            width: 100%;
+            max-width: 400px;
+            margin-bottom: 30px;
+            animation: fadeInDown 1s ease-in-out;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            animation: fadeInUp 1s ease-in-out;
+        }
+
+        p {
+            color: #666;
+            font-size: 18px;
+            line-height: 1.5;
+            margin-bottom: 30px;
+            animation: fadeInUp 2s ease-in-out;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .cta-button {
+            background-color: #007bff;
+            color: #fff;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            animation: fadeInUp 3s ease-in-out;
+        }
+
+        .cta-button:hover {
+            background-color: #0062cc;
+        }
+
+        .contact-button {
+            background-color: #ddd;
+            color: #333;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            animation: fadeInUp 4s ease-in-out;
+        }
+
+        .contact-button:hover {
+            background-color: #bbb;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <img src="your-logo-or-image.png" alt="Bigtable Connect" class="header-image">
+    <h1>Welcome to Bigtable Connect</h1>
+    <p>We simplify group communication by bringing people together and enabling seamless message transfer within their groups.</p>
+    <div class="button-container">
+        <button class="cta-button">Download App</button>
+        <button class="contact-button">Contact Us</button>
+    </div>
+</div>
+
+</body>
+</html>
