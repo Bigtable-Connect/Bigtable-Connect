@@ -89,11 +89,11 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.example" "\0"
+            VALUE "CompanyName", "io.github.bigtableconnect" "\0"
             VALUE "FileDescription", "bigtable_connect" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "bigtable_connect" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2025 com.example. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2025 io.github.bigtableconnect. All rights reserved." "\0"
             VALUE "OriginalFilename", "bigtable_connect.exe" "\0"
             VALUE "ProductName", "bigtable_connect" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"

@@ -62,6 +62,25 @@
           "other_platform_oauth_client": []
         }
       }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:586592318920:android:f482be8f1c4c52a6c53cfd",
+        "android_client_info": {
+          "package_name": "io.github.bigtableconnect"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDxt2_HAugXvbs-25Lyqf00Qc7J2LMucL0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
     }
   ],
   "configuration_version": "1"

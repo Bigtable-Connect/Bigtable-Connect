@@ -1,4 +1,4 @@
-package com.example.bigtable_connect
+package io.github.bigtableconnect.bigtable_connect
 
 import io.flutter.embedding.android.FlutterActivity
 
