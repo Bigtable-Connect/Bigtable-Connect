@@ -1,14 +1,33 @@
 {
   "project_info": {
-    "project_number": "947141844718",
-    "firebase_url": "https://bigtable-connect-default-rtdb.asia-southeast1.firebasedatabase.app",
-    "project_id": "bigtable-connect",
-    "storage_bucket": "bigtable-connect.firebasestorage.app"
+    "project_number": "586592318920",
+    "firebase_url": "https://arogyasair-b7bb5-default-rtdb.firebaseio.com",
+    "project_id": "arogyasair-b7bb5",
+    "storage_bucket": "arogyasair-b7bb5.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:947141844718:android:1148ec6fc03f6449485dff",
+        "mobilesdk_app_id": "1:586592318920:android:75285b5ac0dbce88c53cfd",
+        "android_client_info": {
+          "package_name": "bigtableconnect.github.io"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDxt2_HAugXvbs-25Lyqf00Qc7J2LMucL0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:586592318920:android:9aa3c492b85db60ac53cfd",
         "android_client_info": {
           "package_name": "com.example.bigtable_connect"
         }
@@ -16,7 +35,26 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDAxFwGDwZep_KqlLQT0Uo0PF4cGlPHgPw"
+          "current_key": "AIzaSyDxt2_HAugXvbs-25Lyqf00Qc7J2LMucL0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:586592318920:android:4d3e1aa628744b90c53cfd",
+        "android_client_info": {
+          "package_name": "com.example.databasedemo1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDxt2_HAugXvbs-25Lyqf00Qc7J2LMucL0"
         }
       ],
       "services": {

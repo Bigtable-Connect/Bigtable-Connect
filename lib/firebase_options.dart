@@ -32,7 +32,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
+              'you can reconfigure this by running the FlutterFire CLI again.',
         );
       default:
         throw UnsupportedError(
@@ -52,11 +52,12 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDAxFwGDwZep_KqlLQT0Uo0PF4cGlPHgPw',
-    appId: '1:947141844718:android:1148ec6fc03f6449485dff',
-    messagingSenderId: '947141844718',
-    projectId: 'bigtable-connect',
-    storageBucket: 'bigtable-connect.firebasestorage.app',
+    apiKey: 'AIzaSyDxt2_HAugXvbs-25Lyqf00Qc7J2LMucL0',
+    appId: '1:586592318920:android:75285b5ac0dbce88c53cfd',
+    messagingSenderId: '586592318920',
+    projectId: 'arogyasair-b7bb5',
+    databaseURL: 'https://arogyasair-b7bb5-default-rtdb.firebaseio.com',
+    storageBucket: 'arogyasair-b7bb5.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
