@@ -62,10 +62,6 @@ class AuthService {
       required String password,
       required BuildContext context,
       required String FcmToken}) async {
-    print(email);
-    print(password);
-    print(context);
-    print(FcmToken);
     // Show loading dialog
     showDialog(
       context: context,
