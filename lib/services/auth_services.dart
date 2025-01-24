@@ -153,8 +153,12 @@ class AuthService {
                 // await saveData('key', key);
                 Navigator.pop(context);
                 Navigator.pop(context);
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => const HomeScreen()));
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const HomeScreen(),
+                  ),
+                );
               } else {
                 msg = "Sorry..! Wrong email or Password";
                 _showSnackbar(context, msg);
