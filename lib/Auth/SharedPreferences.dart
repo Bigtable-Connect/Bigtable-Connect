@@ -9,7 +9,7 @@ Future<void> saveData(key, value) async {
 
 Future<void> saveKey(value) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  await prefs.setInt("key", value);
+  await prefs.setString("key", value);
 }
 
 Future<String?> getData(key) async {

@@ -1,6 +1,7 @@
 // ignore_for_file: non_constant_identifier_names, use_build_context_synchronously
 
 import 'package:bigtable_connect/Auth/Login.dart';
+import 'package:bigtable_connect/home_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
@@ -8,12 +9,37 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Auth/SharedPreferences.dart';
+import '../Model/registration_mode.dart';
 
 class AuthService {
-  Future<void> signup({required String email, required String password}) async {
+  late Query dbRef2;
+
+  Future<void> signUp(
+      {required String firstName,
+      required String lastName,
+      required String email,
+      required String password,
+      required String contact,
+      required String gender,
+      required String fcmToken,
+      required BuildContext context}) async {
     try {
       await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
+
+      DatabaseReference dbRefTblUser =
+          FirebaseDatabase.instance.ref().child('BigtableConnect/tblUser');
+
+      RegistrationModel regobj = RegistrationModel(
+        firstName,
+        lastName,
+        email,
+        contact,
+        gender,
+        fcmToken,
+      );
+      dbRefTblUser.push().set(regobj.toJson());
+      Navigator.pop(context);
     } on FirebaseAuthException catch (e) {
       String message = "";
       if (e.code == 'weak-password') {
@@ -36,6 +62,10 @@ class AuthService {
       required String password,
       required BuildContext context,
       required String FcmToken}) async {
+    print(email);
+    print(password);
+    print(context);
+    print(FcmToken);
     // Show loading dialog
     showDialog(
       context: context,
@@ -47,12 +77,11 @@ class AuthService {
     try {
       await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
-      Query dbRef2;
 
       if (email == "programmerprodigies@gmail.com") {
         dbRef2 = FirebaseDatabase.instance
             .ref()
-            .child('pp_test_mode/tblAdmin')
+            .child('BigtableConnect/tblUser')
             .orderByChild("Email")
             .equalTo(email);
         Map data;
@@ -73,14 +102,12 @@ class AuthService {
         await saveData("AdminEmail", email);
         Navigator.pop(context);
         Navigator.pop(context);
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (scaffoldContext) => const LoginPage()));
+        Navigator.push(context,
+            MaterialPageRoute(builder: (scaffoldContext) => const LoginPage()));
       } else {
         dbRef2 = FirebaseDatabase.instance
             .ref()
-            .child('pp_test_mode/tblStudent')
+            .child('BigtableConnect/tblUser')
             .orderByChild("Email")
             .equalTo(email);
         String msg = "Invalid email or Password..!";
@@ -93,119 +120,90 @@ class AuthService {
             var firstName = data["FirstName"];
             var lastName = data["LastName"];
             var email = data["Email"];
-            var semester = data["Semester"];
-            var theory = data["Theory"].toString();
-            var practical = data["Practical"].toString();
-            var papers = data["Papers"].toString();
-            var demo = data["Demo"].toString();
-            Map semData = {};
-            Query dbRef = FirebaseDatabase.instance
-                .ref()
-                .child('pp_test_mode/tblSemester')
-                .child(semester);
-            DatabaseEvent databaseEventStudent = await dbRef.once();
-            DataSnapshot dataSnapshotStudent = databaseEventStudent.snapshot;
-            semData = dataSnapshotStudent.value as Map;
-            if (semData["Visibility"] == "true") {
-              if (FCMToken == "") {
-                final updatedData = {"FCMToken": FcmToken};
-                final userRef = FirebaseDatabase.instance
-                    .ref()
-                    .child("pp_test_mode/tblStudent")
-                    .child(key!);
-                await userRef.update(updatedData);
-                if (data["Email"] == email) {
-                  await saveData('FirstName', firstName);
-                  await saveData('LastName', lastName);
-                  await saveData('Semester', semester);
-                  await saveData('SemesterName', semData["Semester"]);
-                  await saveData('Email', email);
-                  await saveData('Theory', theory);
-                  await saveData('Practical', practical);
-                  await saveData('Papers', papers);
-                  await saveData('Demo', demo);
-                  await saveKey(key);
-                  Navigator.pop(context);
-                  Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const LoginPage(),
-                    ),
-                  );
-                } else {
-                  msg = "Sorry..! Wrong email or Password";
-                  _showSnackbar(context, msg);
-                }
-              } else if (FCMToken == FcmToken) {
-                if (data["Email"] == email) {
-                  await saveData('FirstName', firstName);
-                  await saveData('LastName', lastName);
-                  await saveData('SemesterName', semData["Semester"]);
-                  await saveData('Semester', semester);
-                  await saveData('Email', email);
-                  await saveData('Theory', theory);
-                  await saveData('Practical', practical);
-                  await saveData('Papers', papers);
-                  await saveData('Demo', demo);
-                  await saveKey(key);
-                  // await saveData('key', key);
-                  Navigator.pop(context);
-                  Navigator.pop(context);
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const LoginPage()));
-                } else {
-                  msg = "Sorry..! Wrong email or Password";
-                  _showSnackbar(context, msg);
-                }
-              } else if (FCMToken != FcmToken) {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: const Text('Login..!!'),
-                      content: const Text(
-                          "You already have logged in some other phone, you can not login with this device."),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          child: const Text('Ok'),
-                        ),
-                      ],
-                    );
-                  },
+            if (FCMToken == "") {
+              final updatedData = {"FCMToken": FcmToken};
+              final userRef = FirebaseDatabase.instance
+                  .ref()
+                  .child("BigtableConnect/tblUser")
+                  .child(key!);
+              await userRef.update(updatedData);
+              if (data["Email"] == email) {
+                await saveData('FirstName', firstName);
+                await saveData('LastName', lastName);
+                await saveData('Email', email);
+                await saveKey(key);
+                Navigator.pop(context);
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const HomeScreen(),
+                  ),
                 );
-                SharedPreferences prefs = await SharedPreferences.getInstance();
-                prefs.remove("FirstName");
-                prefs.remove("LastName");
-                prefs.remove("Semester");
-                prefs.remove("SemesterName");
-                prefs.remove("Email");
-                prefs.remove("Theory");
-                prefs.remove("Practical");
-                prefs.remove("Papers");
-                prefs.remove("Demo");
-                prefs.remove("key");
+              } else {
+                msg = "Sorry..! Wrong email or Password";
+                _showSnackbar(context, msg);
               }
-            } else if (semData["Visibility"] == "false") {
+            } else if (FCMToken == FcmToken) {
+              if (data["Email"] == email) {
+                await saveData('FirstName', firstName);
+                await saveData('LastName', lastName);
+                await saveData('Email', email);
+                await saveKey(key);
+                // await saveData('key', key);
+                Navigator.pop(context);
+                Navigator.pop(context);
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => const HomeScreen()));
+              } else {
+                msg = "Sorry..! Wrong email or Password";
+                _showSnackbar(context, msg);
+              }
+            } else if (FCMToken != FcmToken) {
               showDialog(
                 context: context,
                 builder: (BuildContext context) {
                   return AlertDialog(
                     title: const Text('Login..!!'),
                     content: const Text(
-                        "The semester you are trying to access is currently not available.\nPlease contact admin on this email address:- pp_test_mode@gmail.com for more details"),
+                        "You already have logged in some other device, Do you want to continue with this device ?"),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.of(context).pop(),
-                        child: const Text('Ok'),
+                        child: const Text('No'),
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          final updatedData = {"FCMToken": FcmToken};
+                          final userRef = FirebaseDatabase.instance
+                              .ref()
+                              .child("BigtableConnect/tblUser")
+                              .child(key!);
+                          await userRef.update(updatedData);
+                          await saveData('FirstName', firstName);
+                          await saveData('LastName', lastName);
+                          await saveData('Email', email);
+                          await saveKey(key);
+                          Navigator.pop(context);
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const HomeScreen(),
+                            ),
+                          );
+                        },
+                        child: const Text('Yes'),
                       ),
                     ],
                   );
                 },
               );
+              SharedPreferences prefs = await SharedPreferences.getInstance();
+              prefs.remove("FirstName");
+              prefs.remove("LastName");
+              prefs.remove("Email");
+              prefs.remove("key");
             }
           }
         });
@@ -241,7 +239,7 @@ class AuthService {
       }
     } catch (e) {
       if (kDebugMode) {
-        print(e.toString());
+        print(e);
       }
     }
   }

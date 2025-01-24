@@ -1,4 +1,7 @@
+// ignore_for_file: prefer_typing_uninitialized_variables, use_build_context_synchronously, non_constant_identifier_names
+
 import 'package:bigtable_connect/Auth/Login.dart';
+import 'package:bigtable_connect/home_screen.dart';
 import 'package:bigtable_connect/secondFirebaseInitialization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -18,8 +21,8 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   // Initialize the primary Firebase app
-  await Firebase.initializeApp();
   await InitializeSecondProject.initializeSecondProject();
+  await Firebase.initializeApp();
   runApp(const MyApp());
 }
 
@@ -62,47 +65,17 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _navigateToHome() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    var firstTime = prefs.containsKey("firstTime");
-    BuildContext Context = context;
+    // SharedPreferences prefs = await SharedPreferences.getInstance();
+    // BuildContext Context = context;
 
-    if (!firstTime) {
-      await showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Here\'s a message for you from the admin...!!'),
-            content: const Text(
-                "You have to make a payment before logging in. To know the details of the packages and the price, please contact the admin at this email address: programmerprodigies@gmail.com."),
-            actions: [
-              TextButton(
-                onPressed: () async {
-                  Navigator.of(context).pop(); // Close the dialog
-                  // await saveFirstTime(true);
-                  await Future.delayed(const Duration(seconds: 5));
-                  fcmToken = await _fcm.getToken();
-                  await _checkIfLoggedIn();
-                  Navigator.pushReplacement(
-                    Context,
-                    MaterialPageRoute(builder: (context) => page),
-                  );
-                },
-                child: const Text('Ok'),
-              ),
-            ],
-          );
-        },
-      );
-    } else {
-      // If not the first time, proceed directly
-      await Future.delayed(const Duration(seconds: 5));
-      fcmToken = await _fcm.getToken();
-      await _checkIfLoggedIn();
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => page),
-      );
-    }
+    // If not the first time, proceed directly
+    await Future.delayed(const Duration(seconds: 5));
+    fcmToken = await _fcm.getToken();
+    await _checkIfLoggedIn();
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => page),
+    );
   }
 
   bool isLoginProcessRunning = false; // Prevent multiple login checks
@@ -124,7 +97,7 @@ class _SplashScreenState extends State<SplashScreen> {
         var email = await getData("Email");
         Query dbRef2 = FirebaseDatabase.instance
             .ref()
-            .child('pp_test_mode/tblStudent')
+            .child('BigtableConnect/tblUser')
             .orderByChild("Email")
             .equalTo(email);
 
@@ -133,32 +106,18 @@ class _SplashScreenState extends State<SplashScreen> {
             String? key = x.key;
             Map data = x.value as Map;
             String? FCMToken = data["FCMToken"];
-            String semester = data["Semester"];
 
-            // Get semester data
-            Query dbRef = FirebaseDatabase.instance
-                .ref()
-                .child('pp_test_mode/tblSemester')
-                .child(semester);
-
-            DatabaseEvent databaseEventStudent = await dbRef.once();
-            Map semData = databaseEventStudent.snapshot.value as Map;
-
-            if (semData["Visibility"] == "true") {
-              if (FCMToken == fcmToken) {
-                await saveStudentData(data, key, semData);
-                page = const LoginPage(); // Student Page
-              } else if (FCMToken == "") {
-                await saveStudentData(data, key, semData);
-                await updateFCMToken(key!, fcmToken!);
-                page = const LoginPage();
-              } else {
-                await clearPreferences(); // Clear preferences
-                await updateFCMToken(key!, "");
-                page = const MyApp(); // Redirect to App
-              }
+            if (FCMToken == fcmToken) {
+              await saveStudentData(data, key);
+              page = const HomeScreen(); // Student Page
+            } else if (FCMToken == "") {
+              await saveStudentData(data, key);
+              await updateFCMToken(key!, fcmToken!);
+              page = const HomeScreen();
             } else {
-              page = const LoginPage(); // Login page if semester not visible
+              await clearPreferences(); // Clear preferences
+              await updateFCMToken(key!, "");
+              page = const LoginPage(); // Redirect to App
             }
           }
         });
@@ -179,16 +138,10 @@ class _SplashScreenState extends State<SplashScreen> {
     // await saveFirstTime(true);
   }
 
-  Future<void> saveStudentData(Map data, String? key, Map semData) async {
+  Future<void> saveStudentData(Map data, String? key) async {
     await saveData('FirstName', data["FirstName"]);
     await saveData('LastName', data["LastName"]);
-    await saveData('Semester', data["Semester"]);
-    await saveData('SemesterName', semData["Semester"]);
     await saveData('Email', data["Email"]);
-    await saveData('Theory', data["Theory"].toString());
-    await saveData('Practical', data["Practical"].toString());
-    await saveData('Papers', data["Papers"].toString());
-    await saveData('Demo', data["Demo"].toString());
     await saveData('key', key);
   }
 
@@ -196,7 +149,7 @@ class _SplashScreenState extends State<SplashScreen> {
     final updatedData = {"FCMToken": FcmToken};
     final userRef = FirebaseDatabase.instance
         .ref()
-        .child("pp_test_mode/tblStudent")
+        .child("BigtableConnect/tblUser")
         .child(key);
     await userRef.update(updatedData);
   }
@@ -204,7 +157,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xff2a446b),
+      backgroundColor: const Color(0xFF113826),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

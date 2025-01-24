@@ -42,54 +42,56 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyAZuA2CoPUNgil55Fjc2TbKupLooIiclG4',
-    appId: '1:586592318920:web:4a25fb9bc4355febc53cfd',
-    messagingSenderId: '586592318920',
-    projectId: 'arogyasair-b7bb5',
-    authDomain: 'arogyasair-b7bb5.firebaseapp.com',
-    databaseURL: 'https://arogyasair-b7bb5-default-rtdb.firebaseio.com',
-    storageBucket: 'arogyasair-b7bb5.appspot.com',
-    measurementId: 'G-W784RHPQ98',
+    apiKey: 'AIzaSyBx4cuzLQsUIv_KNjxiW39_D6E05scWgpY',
+    appId: '1:947141844718:web:634d651b76eb490d485dff',
+    messagingSenderId: '947141844718',
+    projectId: 'bigtable-connect',
+    authDomain: 'bigtable-connect.firebaseapp.com',
+    databaseURL: 'https://bigtable-connect-default-rtdb.asia-southeast1.firebasedatabase.app',
+    storageBucket: 'bigtable-connect.firebasestorage.app',
+    measurementId: 'G-5TRCLQFW2N',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDxt2_HAugXvbs-25Lyqf00Qc7J2LMucL0',
-    appId: '1:586592318920:android:f482be8f1c4c52a6c53cfd',
-    messagingSenderId: '586592318920',
-    projectId: 'arogyasair-b7bb5',
-    databaseURL: 'https://arogyasair-b7bb5-default-rtdb.firebaseio.com',
-    storageBucket: 'arogyasair-b7bb5.appspot.com',
+    apiKey: 'AIzaSyDAxFwGDwZep_KqlLQT0Uo0PF4cGlPHgPw',
+    appId: '1:947141844718:android:1365a31949fbf483485dff',
+    messagingSenderId: '947141844718',
+    projectId: 'bigtable-connect',
+    databaseURL: 'https://bigtable-connect-default-rtdb.asia-southeast1.firebasedatabase.app',
+    storageBucket: 'bigtable-connect.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyA-55_DN3IEPXIX6uNOqwV-L2knqqdBOkc',
-    appId: '1:586592318920:ios:3659d0be82acbcfec53cfd',
-    messagingSenderId: '586592318920',
-    projectId: 'arogyasair-b7bb5',
-    databaseURL: 'https://arogyasair-b7bb5-default-rtdb.firebaseio.com',
-    storageBucket: 'arogyasair-b7bb5.appspot.com',
-    iosBundleId: 'com.example.bigtableConnect',
+    apiKey: 'AIzaSyAixhYlyc8CYS0tf0fbTpC_hBy19mBpl1I',
+    appId: '1:947141844718:ios:7840fd429e7b2f36485dff',
+    messagingSenderId: '947141844718',
+    projectId: 'bigtable-connect',
+    databaseURL: 'https://bigtable-connect-default-rtdb.asia-southeast1.firebasedatabase.app',
+    storageBucket: 'bigtable-connect.firebasestorage.app',
+    androidClientId: '947141844718-vgf9vhu2uqi6oc1fb0ls79gspqj95e30.apps.googleusercontent.com',
+    iosBundleId: 'io.github.bigtableconnect.bigtableConnect',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyA-55_DN3IEPXIX6uNOqwV-L2knqqdBOkc',
-    appId: '1:586592318920:ios:3659d0be82acbcfec53cfd',
-    messagingSenderId: '586592318920',
-    projectId: 'arogyasair-b7bb5',
-    databaseURL: 'https://arogyasair-b7bb5-default-rtdb.firebaseio.com',
-    storageBucket: 'arogyasair-b7bb5.appspot.com',
-    iosBundleId: 'com.example.bigtableConnect',
+    apiKey: 'AIzaSyAixhYlyc8CYS0tf0fbTpC_hBy19mBpl1I',
+    appId: '1:947141844718:ios:7840fd429e7b2f36485dff',
+    messagingSenderId: '947141844718',
+    projectId: 'bigtable-connect',
+    databaseURL: 'https://bigtable-connect-default-rtdb.asia-southeast1.firebasedatabase.app',
+    storageBucket: 'bigtable-connect.firebasestorage.app',
+    androidClientId: '947141844718-vgf9vhu2uqi6oc1fb0ls79gspqj95e30.apps.googleusercontent.com',
+    iosBundleId: 'io.github.bigtableconnect.bigtableConnect',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyAZuA2CoPUNgil55Fjc2TbKupLooIiclG4',
-    appId: '1:586592318920:web:4a25fb9bc4355febc53cfd',
-    messagingSenderId: '586592318920',
-    projectId: 'arogyasair-b7bb5',
-    authDomain: 'arogyasair-b7bb5.firebaseapp.com',
-    databaseURL: 'https://arogyasair-b7bb5-default-rtdb.firebaseio.com',
-    storageBucket: 'arogyasair-b7bb5.appspot.com',
-    measurementId: 'G-W784RHPQ98',
+    apiKey: 'AIzaSyBx4cuzLQsUIv_KNjxiW39_D6E05scWgpY',
+    appId: '1:947141844718:web:602bb962abe9e987485dff',
+    messagingSenderId: '947141844718',
+    projectId: 'bigtable-connect',
+    authDomain: 'bigtable-connect.firebaseapp.com',
+    databaseURL: 'https://bigtable-connect-default-rtdb.asia-southeast1.firebasedatabase.app',
+    storageBucket: 'bigtable-connect.firebasestorage.app',
+    measurementId: 'G-JFQG5ZJG51',
   );
 
 }

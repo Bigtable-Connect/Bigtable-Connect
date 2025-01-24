@@ -1,4 +1,6 @@
 // Initialize the secondary Firebase app
+// ignore_for_file: file_names
+
 import 'package:firebase_core/firebase_core.dart';
 
 class InitializeSecondProject {

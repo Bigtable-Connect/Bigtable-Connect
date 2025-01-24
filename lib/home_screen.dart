@@ -1,18 +1,16 @@
-// ignore_for_file: file_names
-
 import 'package:bigtable_connect/secondFirebaseInitialization.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-class ImageFetchTest extends StatefulWidget {
-  const ImageFetchTest({super.key});
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
 
   @override
-  State<ImageFetchTest> createState() => _ImageFetchTestState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _ImageFetchTestState extends State<ImageFetchTest> {
+class _HomeScreenState extends State<HomeScreen> {
   var imagePath = "";
   Future<void> getImage() async{
     // Reference to the PDF in Firebase Storage
@@ -26,6 +24,13 @@ class _ImageFetchTestState extends State<ImageFetchTest> {
   @override
   Widget build(BuildContext context) {
     getImage();
-    return const Placeholder();
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Home page"),
+      ),
+      body: Center(
+        child: Text(imagePath),
+      ),
+    );
   }
 }

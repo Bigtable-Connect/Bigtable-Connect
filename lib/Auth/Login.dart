@@ -1,5 +1,7 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, file_names
 
+import 'package:bigtable_connect/services/auth_services.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
 import 'Signup.dart';
@@ -17,6 +19,19 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   bool isPasswordVisible = true;
+  final FirebaseMessaging _fcm = FirebaseMessaging.instance;
+  late String fcmToken = "";
+
+  @override
+  void initState() {
+    super.initState();
+    _getFcmToken();
+  }
+
+  Future<void> _getFcmToken() async {
+    // await _messagingService.init(context);
+    fcmToken = (await _fcm.getToken())!;
+  }
 
   // New field to track if the email exists
   bool isEmailValid = true;
@@ -42,7 +57,9 @@ class _LoginPageState extends State<LoginPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SizedBox(height: MediaQuery.of(context).size.height * 0.08,),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.08,
+                ),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(0),
                   child: Image.asset(
@@ -121,7 +138,8 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           ),
                         ),
-                        SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+                        SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.02),
                         Form(
                           key: _passwordFormKey,
                           child: Theme(
@@ -179,7 +197,8 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           ),
                         ),
-                        SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+                        SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.02),
                         const Align(
                           alignment: Alignment.centerRight,
                           child: Text(
@@ -200,12 +219,11 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           child: ElevatedButton(
                             onPressed: () async {
-                              // if (_emailFormKey.currentState!.validate()) {
-                              //   if (_passwordFormKey.currentState!.validate()) {
-                              //     _performLogin(emailController.text,
-                              //         passwordController.text, context);
-                              //   }
-                              //const  }
+                              if (_emailFormKey.currentState!.validate()) {
+                                if (_passwordFormKey.currentState!.validate()) {
+                                  AuthService().signIn(email: emailController.text, password: passwordController.text, context: context, FcmToken: fcmToken);
+                                }
+                              }
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF1B4D3E),
@@ -221,7 +239,7 @@ class _LoginPageState extends State<LoginPage> {
                               style: TextStyle(color: Colors.white),
                             ),
                           ),
-                        ),
+                        )
                       ],
                     ),
                   ),
