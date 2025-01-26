@@ -69,6 +69,7 @@ class DefaultFirebaseOptions {
     databaseURL: 'https://bigtable-connect-default-rtdb.asia-southeast1.firebasedatabase.app',
     storageBucket: 'bigtable-connect.firebasestorage.app',
     androidClientId: '947141844718-vgf9vhu2uqi6oc1fb0ls79gspqj95e30.apps.googleusercontent.com',
+    iosClientId: '947141844718-5mkjjj944vrpm5dnqbli6kvvmncdvn05.apps.googleusercontent.com',
     iosBundleId: 'io.github.bigtableconnect.bigtableConnect',
   );
 
@@ -80,6 +81,7 @@ class DefaultFirebaseOptions {
     databaseURL: 'https://bigtable-connect-default-rtdb.asia-southeast1.firebasedatabase.app',
     storageBucket: 'bigtable-connect.firebasestorage.app',
     androidClientId: '947141844718-vgf9vhu2uqi6oc1fb0ls79gspqj95e30.apps.googleusercontent.com',
+    iosClientId: '947141844718-5mkjjj944vrpm5dnqbli6kvvmncdvn05.apps.googleusercontent.com',
     iosBundleId: 'io.github.bigtableconnect.bigtableConnect',
   );
 

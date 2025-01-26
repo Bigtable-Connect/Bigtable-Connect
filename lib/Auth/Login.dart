@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously, file_names
 
+import 'package:bigtable_connect/home_screen.dart';
 import 'package:bigtable_connect/services/auth_services.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +22,7 @@ class _LoginPageState extends State<LoginPage> {
   bool isPasswordVisible = true;
   final FirebaseMessaging _fcm = FirebaseMessaging.instance;
   late String fcmToken = "";
+  var isLoading = false;
 
   @override
   void initState() {
@@ -221,7 +223,11 @@ class _LoginPageState extends State<LoginPage> {
                             onPressed: () async {
                               if (_emailFormKey.currentState!.validate()) {
                                 if (_passwordFormKey.currentState!.validate()) {
-                                  AuthService().signIn(email: emailController.text, password: passwordController.text, context: context, FcmToken: fcmToken);
+                                  AuthService().signIn(
+                                      email: emailController.text,
+                                      password: passwordController.text,
+                                      context: context,
+                                      FcmToken: fcmToken);
                                 }
                               }
                             },
@@ -239,7 +245,30 @@ class _LoginPageState extends State<LoginPage> {
                               style: TextStyle(color: Colors.white),
                             ),
                           ),
-                        )
+                        ),
+                        Divider(
+                            height: MediaQuery.of(context).size.height * 0.05),
+                        ElevatedButton(
+                          onPressed: () async {
+                            await AuthService()
+                                .signInWithGoogle(fcmToken, context);
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const HomeScreen(),
+                              ),
+                            );
+                          },
+                          child: ListTile(
+                            leading: Image.asset(
+                              "assets/Logo/google.webp",
+                              height:
+                                  MediaQuery.of(context).size.height * 0.035,
+                            ),
+                            title: const Text("Sign In with Google"),
+                          ),
+                        ),
                       ],
                     ),
                   ),

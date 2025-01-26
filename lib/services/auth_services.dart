@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Auth/SharedPreferences.dart';
@@ -13,6 +14,147 @@ import '../Model/registration_mode.dart';
 
 class AuthService {
   late Query dbRef2;
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  User get user => _auth.currentUser!;
+
+  Future<bool> signInWithGoogle(String fcmToken, BuildContext context) async {
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) {
+        // User canceled the sign-in
+        return false;
+      }
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithCredential(credential);
+
+      if (userCredential.user != null) {
+        if (userCredential.additionalUserInfo!.isNewUser) {
+          var name = userCredential.user!.displayName!.split(" ");
+          var firstName = name[0];
+          var lastName = name[1];
+          var contact = userCredential.user!.phoneNumber;
+          var email = userCredential.user!.email;
+          var profileImage = userCredential.user!.photoURL;
+          await saveData('FirstName', firstName);
+          await saveData('LastName', lastName);
+          await saveData('Email', email);
+          DatabaseReference dbRefTblUser =
+              FirebaseDatabase.instance.ref().child('BigtableConnect/tblUser');
+          RegistrationModel regobj = RegistrationModel(
+            firstName,
+            lastName,
+            email!,
+            contact ?? "",
+            '',
+            fcmToken,
+            profileImage ?? "https://www.istockphoto.com/photos/user-profile-image",
+          );
+          dbRefTblUser.push().set(regobj.toJson());
+          // await saveKey(key);
+        } else {
+          dbRef2 = FirebaseDatabase.instance
+              .ref()
+              .child('BigtableConnect/tblUser')
+              .orderByChild("Email")
+              .equalTo(userCredential.user!.email);
+          String msg = "Invalid email or Password..!";
+          Map data;
+          await dbRef2.once().then((documentSnapshot) async {
+            for (var x in documentSnapshot.snapshot.children) {
+              String? key = x.key;
+              data = x.value as Map;
+              String? FCMToken = data["FCMToken"];
+              var firstName = data["FirstName"];
+              var lastName = data["LastName"];
+              var email = data["Email"];
+              var profileImage = data["ProfileImage"];
+              if (FCMToken == "") {
+                final updatedData = {"FCMToken": fcmToken};
+                final userRef = FirebaseDatabase.instance
+                    .ref()
+                    .child("BigtableConnect/tblUser")
+                    .child(key!);
+                await userRef.update(updatedData);
+                if (data["Email"] == email) {
+                  await saveData('FirstName', firstName);
+                  await saveData('LastName', lastName);
+                  await saveData('Email', email);
+                  await saveData('ProfileImage', profileImage);
+                  await saveKey(key);
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const HomeScreen(),
+                    ),
+                  );
+                } else {
+                  msg = "Sorry..! Wrong email or Password";
+                  _showSnackbar(context, msg);
+                }
+              } else if (FCMToken == fcmToken) {
+                if (data["Email"] == email) {
+                  await saveData('FirstName', firstName);
+                  await saveData('LastName', lastName);
+                  await saveData('Email', email);
+                  await saveData('ProfileImage', profileImage);
+                  await saveKey(key);
+                  // await saveData('key', key);
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const HomeScreen(),
+                    ),
+                  );
+                } else {
+                  msg = "Sorry..! Wrong email or Password";
+                  _showSnackbar(context, msg);
+                }
+              } else if (FCMToken != fcmToken) {
+                final updatedData = {"FCMToken": fcmToken};
+                final userRef = FirebaseDatabase.instance
+                    .ref()
+                    .child("BigtableConnect/tblUser")
+                    .child(key!);
+                await userRef.update(updatedData);
+                await saveData('FirstName', firstName);
+                await saveData('LastName', lastName);
+                await saveData('Email', email);
+                await saveData('ProfileImage', profileImage);
+                await saveKey(key);
+                Navigator.pop(context);
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const HomeScreen(),
+                  ),
+                );
+              }
+            }
+          });
+        }
+        // return true;
+      }
+      return false;
+    } catch (e) {
+      if (kDebugMode) {
+        print("Error during Google Sign-In: $e");
+      }
+      return false;
+    }
+  }
 
   Future<void> signUp(
       {required String firstName,
@@ -37,6 +179,7 @@ class AuthService {
         contact,
         gender,
         fcmToken,
+        "https://www.istockphoto.com/photos/user-profile-image",
       );
       dbRefTblUser.push().set(regobj.toJson());
       Navigator.pop(context);
@@ -116,6 +259,7 @@ class AuthService {
             var firstName = data["FirstName"];
             var lastName = data["LastName"];
             var email = data["Email"];
+            var profileImage = data["ProfileImage"];
             if (FCMToken == "") {
               final updatedData = {"FCMToken": FcmToken};
               final userRef = FirebaseDatabase.instance
@@ -127,6 +271,7 @@ class AuthService {
                 await saveData('FirstName', firstName);
                 await saveData('LastName', lastName);
                 await saveData('Email', email);
+                await saveData('ProfileImage', profileImage);
                 await saveKey(key);
                 Navigator.pop(context);
                 Navigator.pop(context);
@@ -145,6 +290,7 @@ class AuthService {
                 await saveData('FirstName', firstName);
                 await saveData('LastName', lastName);
                 await saveData('Email', email);
+                await saveData('ProfileImage', profileImage);
                 await saveKey(key);
                 // await saveData('key', key);
                 Navigator.pop(context);
@@ -183,7 +329,9 @@ class AuthService {
                           await saveData('FirstName', firstName);
                           await saveData('LastName', lastName);
                           await saveData('Email', email);
+                          await saveData('ProfileImage', profileImage);
                           await saveKey(key);
+                          Navigator.pop(context);
                           Navigator.pop(context);
                           Navigator.pop(context);
                           Navigator.push(
@@ -228,24 +376,23 @@ class AuthService {
                   child: const Text('OK'),
                   onPressed: () {
                     Navigator.of(context).pop();
+                    Navigator.of(context).pop();
                   },
                 )
               ],
             );
           },
           barrierDismissible: false);
-      if (kDebugMode) {
-        print(message);
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print(e);
-      }
     }
   }
 
   Future<void> signOut({required BuildContext context}) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.clear();
     await FirebaseAuth.instance.signOut();
+    Navigator.pop(context);
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => const LoginPage()));
   }
 
   void _showSnackbar(BuildContext context, String message) {

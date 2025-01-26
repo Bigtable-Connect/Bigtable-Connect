@@ -5,9 +5,10 @@ class RegistrationModel{
   late String contact;
   late String gender;
   late String fCMToken;
+  late String profileImage;
 
   RegistrationModel(this.firstName, this.lastName, this.email, this.contact,
-      this.gender, this.fCMToken);
+      this.gender, this.fCMToken, this.profileImage);
 
   Map<dynamic, dynamic> toJson() => <dynamic, dynamic>{
     'FirstName': firstName,
@@ -16,5 +17,6 @@ class RegistrationModel{
     'ContactNumber': contact,
     'Gender': gender,
     'FCMToken': fCMToken,
+    'ProfileImage': profileImage
   };
 }

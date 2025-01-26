@@ -8,50 +8,6 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:947141844718:android:1148ec6fc03f6449485dff",
-        "android_client_info": {
-          "package_name": "com.example.bigtable_connect"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "947141844718-vgf9vhu2uqi6oc1fb0ls79gspqj95e30.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.example.bigtable_connect",
-            "certificate_hash": "8dedb5e8bd99dd9b12a3f7ea2a0ece1a84718e69"
-          }
-        },
-        {
-          "client_id": "947141844718-07qa6c2msoggs4re4nitf8ao99eou18l.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyDAxFwGDwZep_KqlLQT0Uo0PF4cGlPHgPw"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "947141844718-07qa6c2msoggs4re4nitf8ao99eou18l.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
-              "client_id": "947141844718-bdj9mlu978bemp57qg4c6a649u1ugo6n.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.example.bigtableConnect"
-              }
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
         "mobilesdk_app_id": "1:947141844718:android:1365a31949fbf483485dff",
         "android_client_info": {
           "package_name": "io.github.bigtableconnect"
@@ -59,7 +15,15 @@
       },
       "oauth_client": [
         {
-          "client_id": "947141844718-07qa6c2msoggs4re4nitf8ao99eou18l.apps.googleusercontent.com",
+          "client_id": "947141844718-gcsqln8c5spifbiorpijimjl6bm1cmn3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "io.github.bigtableconnect",
+            "certificate_hash": "8dedb5e8bd99dd9b12a3f7ea2a0ece1a84718e69"
+          }
+        },
+        {
+          "client_id": "947141844718-4ckm6h764qggq45arknpkd09iu18jiaf.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
@@ -76,10 +40,10 @@
               "client_type": 3
             },
             {
-              "client_id": "947141844718-bdj9mlu978bemp57qg4c6a649u1ugo6n.apps.googleusercontent.com",
+              "client_id": "947141844718-5mkjjj944vrpm5dnqbli6kvvmncdvn05.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.example.bigtableConnect"
+                "bundle_id": "io.github.bigtableconnect.bigtableConnect"
               }
             }
           ]

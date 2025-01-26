@@ -47,10 +47,8 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   String data = "";
-  final key = 'AdminEmail';
-  final key1 = 'Email';
-  late bool adminContains;
-  late bool studentContains;
+  final key1 = "Email";
+  late bool contains;
   late String keyToCheck;
   var page;
   late String? fcmToken = "";
@@ -85,15 +83,12 @@ class _SplashScreenState extends State<SplashScreen> {
     isLoginProcessRunning = true;
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    adminContains = prefs.containsKey(key);
-    studentContains = prefs.containsKey(key1);
+    contains = prefs.containsKey(key1);
 
     User? user = FirebaseAuth.instance.currentUser;
 
     if (user != null) {
-      if (adminContains) {
-        page = const LoginPage(); // Admin Page
-      } else if (studentContains) {
+      if (contains) {
         var email = await getData("Email");
         Query dbRef2 = FirebaseDatabase.instance
             .ref()
