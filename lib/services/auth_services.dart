@@ -10,7 +10,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Auth/SharedPreferences.dart';
-import '../Model/registration_mode.dart';
+import '../Model/registration_model.dart';
 
 class AuthService {
   late Query dbRef2;
