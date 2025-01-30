@@ -1,6 +1,5 @@
 // ignore_for_file: use_build_context_synchronously, file_names
 
-import 'package:bigtable_connect/home_screen.dart';
 import 'package:bigtable_connect/services/auth_services.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -252,13 +251,13 @@ class _LoginPageState extends State<LoginPage> {
                           onPressed: () async {
                             await AuthService()
                                 .signInWithGoogle(fcmToken, context);
-                            Navigator.pop(context);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const HomeScreen(),
-                              ),
-                            );
+                            // Navigator.pop(context);
+                            // Navigator.push(
+                            //   context,
+                            //   MaterialPageRoute(
+                            //     builder: (context) => const HomeScreen(),
+                            //   ),
+                            // );
                           },
                           child: ListTile(
                             leading: Image.asset(

@@ -1,7 +1,9 @@
+import 'package:bigtable_connect/screens/personal_chat_screen.dart';
+import 'package:bigtable_connect/services/notification_service.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 
-import 'Auth/SharedPreferences.dart';
+import '../Auth/SharedPreferences.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -11,6 +13,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final _messagingService = MessagingService();
+
   final icons = [
     "",
     "assets/Logo/img_2.png",
@@ -29,6 +33,12 @@ class _HomeScreenState extends State<HomeScreen> {
   late String userKey;
   late String profileImage;
   bool isDataFetched = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _messagingService.init(context);
+  }
 
   Future<void> loadData() async {
     if (isDataFetched) return;
@@ -66,8 +76,21 @@ class _HomeScreenState extends State<HomeScreen> {
                   elevation: 0,
                   title: Row(
                     children: [
-                      CircleAvatar(
-                        child: Image.network(profileImage),
+                      Container(
+                        decoration: const BoxDecoration(
+                          color: Colors.white10,
+                          shape: BoxShape.circle, // Use circle shape
+                        ),
+                        child: ClipOval(
+                          // Ensures the image itself is circular
+                          child: Image.network(
+                            profileImage,
+                            fit: BoxFit.fill,
+                            height: MediaQuery.of(context).size.height * 0.05,
+                            width: MediaQuery.of(context).size.height *
+                                0.05, // Maintain circular shape
+                          ),
+                        ),
                       ),
                       SizedBox(
                         width: MediaQuery.of(context).size.width * 0.02,
@@ -170,7 +193,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         // ),
                         GestureDetector(
                           onTap: () {
-                            print("Personal chat tapped");
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const PersonalCharScreen(),
+                              ),
+                            );
                           }, // Handle tap
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
@@ -207,7 +235,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           children: [
                             GestureDetector(
                               onTap: () {
-                                print("Personal chat tapped");
+                                print("Joined classes");
                               }, // Handle tap
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
@@ -219,7 +247,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       shape: BoxShape.circle,
                                     ),
                                     child: Image.asset(
-                                      "assets/Logo/communication.png",
+                                      "assets/Logo/img_2.png",
                                       color: Colors.white,
                                       height:
                                           MediaQuery.of(context).size.height *
@@ -231,7 +259,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                           MediaQuery.of(context).size.height *
                                               0.009),
                                   const Text(
-                                    "Personal Chat",
+                                    "Joined Classes",
                                     style: TextStyle(
                                         fontSize: 14, color: Colors.black),
                                     textAlign: TextAlign.center,
@@ -244,7 +272,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     MediaQuery.of(context).size.width * 0.05),
                             GestureDetector(
                               onTap: () {
-                                print("Personal chat tapped");
+                                print("My classes");
                               }, // Handle tap
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
@@ -256,7 +284,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       shape: BoxShape.circle,
                                     ),
                                     child: Image.asset(
-                                      "assets/Logo/communication.png",
+                                      "assets/Logo/img_1.png",
                                       color: Colors.white,
                                       height:
                                           MediaQuery.of(context).size.height *
@@ -268,7 +296,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                           MediaQuery.of(context).size.height *
                                               0.009),
                                   const Text(
-                                    "Personal Chat",
+                                    "My Classes",
                                     style: TextStyle(
                                         fontSize: 14, color: Colors.black),
                                     textAlign: TextAlign.center,
@@ -295,14 +323,18 @@ class _HomeScreenState extends State<HomeScreen> {
                                         GestureDetector(
                                           child: Card(
                                             child: Padding(
-                                              padding: const EdgeInsets.only(left: 10, right: 10, top: 10),
+                                              padding: const EdgeInsets.only(
+                                                  left: 10, right: 10, top: 10),
                                               child: Row(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
                                                 children: [
                                                   Column(
                                                     children: [
                                                       ClipRRect(
-                                                        borderRadius: BorderRadius.circular(15),
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(15),
                                                         child: Image.asset(
                                                           "assets/Logo/communication.png",
                                                           height: 120,
@@ -314,30 +346,45 @@ class _HomeScreenState extends State<HomeScreen> {
                                                   ),
                                                   const Flexible(
                                                     child: Column(
-                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
                                                       children: [
                                                         Padding(
-                                                          padding: EdgeInsets.only(left: 10),
+                                                          padding:
+                                                              EdgeInsets.only(
+                                                                  left: 10),
                                                           child: Text(
                                                             "1",
                                                             style: TextStyle(
-                                                                color: Colors.black,
-                                                                fontWeight: FontWeight.bold,
+                                                                color: Colors
+                                                                    .black,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
                                                                 fontSize: 17),
                                                           ),
                                                         ),
                                                         Padding(
-                                                          padding: EdgeInsets.only(left: 10),
+                                                          padding:
+                                                              EdgeInsets.only(
+                                                                  left: 10),
                                                           child: Text(
                                                             "₹",
-                                                            style: TextStyle(color: Colors.black),
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .black),
                                                           ),
                                                         ),
                                                         Padding(
-                                                          padding: EdgeInsets.only(left: 10),
+                                                          padding:
+                                                              EdgeInsets.only(
+                                                                  left: 10),
                                                           child: Text(
                                                             "userMap[index]!",
-                                                            style: TextStyle(color: Colors.black),
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .black),
                                                           ),
                                                         ),
                                                       ],
@@ -351,14 +398,18 @@ class _HomeScreenState extends State<HomeScreen> {
                                         GestureDetector(
                                           child: Card(
                                             child: Padding(
-                                              padding: const EdgeInsets.only(left: 10, right: 10, top: 10),
+                                              padding: const EdgeInsets.only(
+                                                  left: 10, right: 10, top: 10),
                                               child: Row(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
                                                 children: [
                                                   Column(
                                                     children: [
                                                       ClipRRect(
-                                                        borderRadius: BorderRadius.circular(15),
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(15),
                                                         child: Image.asset(
                                                           "assets/Logo/communication.png",
                                                           height: 120,
@@ -370,30 +421,45 @@ class _HomeScreenState extends State<HomeScreen> {
                                                   ),
                                                   const Flexible(
                                                     child: Column(
-                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
                                                       children: [
                                                         Padding(
-                                                          padding: EdgeInsets.only(left: 10),
+                                                          padding:
+                                                              EdgeInsets.only(
+                                                                  left: 10),
                                                           child: Text(
                                                             "2",
                                                             style: TextStyle(
-                                                                color: Colors.black,
-                                                                fontWeight: FontWeight.bold,
+                                                                color: Colors
+                                                                    .black,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
                                                                 fontSize: 17),
                                                           ),
                                                         ),
                                                         Padding(
-                                                          padding: EdgeInsets.only(left: 10),
+                                                          padding:
+                                                              EdgeInsets.only(
+                                                                  left: 10),
                                                           child: Text(
                                                             "₹",
-                                                            style: TextStyle(color: Colors.black),
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .black),
                                                           ),
                                                         ),
                                                         Padding(
-                                                          padding: EdgeInsets.only(left: 10),
+                                                          padding:
+                                                              EdgeInsets.only(
+                                                                  left: 10),
                                                           child: Text(
                                                             "userMap[index]!",
-                                                            style: TextStyle(color: Colors.black),
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .black),
                                                           ),
                                                         ),
                                                       ],
@@ -407,14 +473,18 @@ class _HomeScreenState extends State<HomeScreen> {
                                         GestureDetector(
                                           child: Card(
                                             child: Padding(
-                                              padding: const EdgeInsets.only(left: 10, right: 10, top: 10),
+                                              padding: const EdgeInsets.only(
+                                                  left: 10, right: 10, top: 10),
                                               child: Row(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
                                                 children: [
                                                   Column(
                                                     children: [
                                                       ClipRRect(
-                                                        borderRadius: BorderRadius.circular(15),
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(15),
                                                         child: Image.asset(
                                                           "assets/Logo/communication.png",
                                                           height: 120,
@@ -426,30 +496,45 @@ class _HomeScreenState extends State<HomeScreen> {
                                                   ),
                                                   const Flexible(
                                                     child: Column(
-                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
                                                       children: [
                                                         Padding(
-                                                          padding: EdgeInsets.only(left: 10),
+                                                          padding:
+                                                              EdgeInsets.only(
+                                                                  left: 10),
                                                           child: Text(
                                                             "3",
                                                             style: TextStyle(
-                                                                color: Colors.black,
-                                                                fontWeight: FontWeight.bold,
+                                                                color: Colors
+                                                                    .black,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
                                                                 fontSize: 17),
                                                           ),
                                                         ),
                                                         Padding(
-                                                          padding: EdgeInsets.only(left: 10),
+                                                          padding:
+                                                              EdgeInsets.only(
+                                                                  left: 10),
                                                           child: Text(
                                                             "₹",
-                                                            style: TextStyle(color: Colors.black),
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .black),
                                                           ),
                                                         ),
                                                         Padding(
-                                                          padding: EdgeInsets.only(left: 10),
+                                                          padding:
+                                                              EdgeInsets.only(
+                                                                  left: 10),
                                                           child: Text(
                                                             "userMap[index]!",
-                                                            style: TextStyle(color: Colors.black),
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .black),
                                                           ),
                                                         ),
                                                       ],
@@ -463,14 +548,18 @@ class _HomeScreenState extends State<HomeScreen> {
                                         GestureDetector(
                                           child: Card(
                                             child: Padding(
-                                              padding: const EdgeInsets.only(left: 10, right: 10, top: 10),
+                                              padding: const EdgeInsets.only(
+                                                  left: 10, right: 10, top: 10),
                                               child: Row(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
                                                 children: [
                                                   Column(
                                                     children: [
                                                       ClipRRect(
-                                                        borderRadius: BorderRadius.circular(15),
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(15),
                                                         child: Image.asset(
                                                           "assets/Logo/communication.png",
                                                           height: 120,
@@ -482,30 +571,45 @@ class _HomeScreenState extends State<HomeScreen> {
                                                   ),
                                                   const Flexible(
                                                     child: Column(
-                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
                                                       children: [
                                                         Padding(
-                                                          padding: EdgeInsets.only(left: 10),
+                                                          padding:
+                                                              EdgeInsets.only(
+                                                                  left: 10),
                                                           child: Text(
                                                             "4",
                                                             style: TextStyle(
-                                                                color: Colors.black,
-                                                                fontWeight: FontWeight.bold,
+                                                                color: Colors
+                                                                    .black,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
                                                                 fontSize: 17),
                                                           ),
                                                         ),
                                                         Padding(
-                                                          padding: EdgeInsets.only(left: 10),
+                                                          padding:
+                                                              EdgeInsets.only(
+                                                                  left: 10),
                                                           child: Text(
                                                             "₹",
-                                                            style: TextStyle(color: Colors.black),
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .black),
                                                           ),
                                                         ),
                                                         Padding(
-                                                          padding: EdgeInsets.only(left: 10),
+                                                          padding:
+                                                              EdgeInsets.only(
+                                                                  left: 10),
                                                           child: Text(
                                                             "userMap[index]!",
-                                                            style: TextStyle(color: Colors.black),
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .black),
                                                           ),
                                                         ),
                                                       ],
@@ -519,15 +623,19 @@ class _HomeScreenState extends State<HomeScreen> {
                                         // Add more cards if needed
                                       ],
                                       options: CarouselOptions(
-                                        height: MediaQuery.of(context).size.width * 1,
+                                        height:
+                                            MediaQuery.of(context).size.width *
+                                                1,
                                         aspectRatio: 16 / 9,
                                         viewportFraction: 0.9,
                                         initialPage: 0,
                                         enableInfiniteScroll: true,
                                         reverse: false,
                                         autoPlay: true,
-                                        autoPlayInterval: const Duration(seconds: 3),
-                                        autoPlayAnimationDuration: const Duration(milliseconds: 800),
+                                        autoPlayInterval:
+                                            const Duration(seconds: 3),
+                                        autoPlayAnimationDuration:
+                                            const Duration(milliseconds: 800),
                                         autoPlayCurve: Curves.fastOutSlowIn,
                                         enlargeCenterPage: true,
                                         scrollDirection: Axis.horizontal,
