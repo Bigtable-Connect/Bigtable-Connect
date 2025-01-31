@@ -179,10 +179,11 @@ class AuthService {
         contact,
         gender,
         fcmToken,
-        "https://www.istockphoto.com/photos/user-profile-image",
+        "https://firebasestorage.googleapis.com/v0/b/arogyasair-b7bb5.appspot.com/o/ProfilePicture%2FDefault.webp?alt=media",
       );
       dbRefTblUser.push().set(regobj.toJson());
       Navigator.pop(context);
+      Navigator.push(context, MaterialPageRoute(builder: (context)=>const LoginPage()));
     } on FirebaseAuthException catch (e) {
       String message = "";
       if (e.code == 'weak-password') {

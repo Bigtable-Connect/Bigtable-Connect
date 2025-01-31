@@ -1,8 +1,10 @@
+import 'package:bigtable_connect/screens/chat_screen.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../Auth/SharedPreferences.dart';
+import '../Model/chat_model.dart';
 
 class PersonalCharScreen extends StatefulWidget {
   const PersonalCharScreen({super.key});
@@ -18,6 +20,7 @@ class _PersonalCharScreenState extends State<PersonalCharScreen> {
   late String userKey;
   late String email, firstname, lastname, fcmToken, profileImage;
   FocusNode searchFocusNode = FocusNode();
+  late String participantId;
 
   Future<void> getUserKey() async {
     userKey = (await getKey())!;
@@ -27,42 +30,56 @@ class _PersonalCharScreenState extends State<PersonalCharScreen> {
     userKey = (await getKey())!;
     DatabaseReference dbRef =
         FirebaseDatabase.instance.ref().child('BigtableConnect/tblChat');
-    DatabaseEvent event = await dbRef.once();
-    DataSnapshot snapshot = event.snapshot;
+    dbRef.once().then(
+      (value) async {
+        for (var i in value.snapshot.children) {
+          var key = i.key;
+          var data = i.value as Map;
+          if (data['ParticipantId'] == userKey || data['SenderId'] == userKey) {
+            if (data['ParticipantId'] == userKey) {
+              participantId = data["SenderId"];
 
-    if (snapshot.value != null) {
-      Map<dynamic, dynamic> values = snapshot.value as Map<dynamic, dynamic>;
-      chats.clear();
+              await getUserData(participantId);
 
-      for (var entry in values.entries) {
-        var key = entry.key;
-        var value = entry.value;
+              // Exclude the logged-in user from chat list
+              // if (email != await getUserEmail()) {
+              chats.add({
+                'Key': key,
+                'SenderId': data["SenderId"],
+                'ParticipantId': data["ParticipantId"],
+                'Firstname': firstname,
+                'Lastname': lastname,
+                'FCMToken': fcmToken,
+                'Email': email,
+                'ProfileImage': profileImage,
+              });
+              // }
+            } else {
+              participantId = data["ParticipantId"];
 
-        String participantId = value["SenderId"] == userKey
-            ? value["ParticipantId"]
-            : value["SenderId"];
+              await getUserData(participantId);
 
-        await getUserData(participantId);
-
-        // Exclude the logged-in user from chat list
-        if (email != await getUserEmail()) {
-          chats.add({
-            'Key': key,
-            'SenderId': value["SenderId"],
-            'ParticipantId': value["ParticipantId"],
-            'Firstname': firstname,
-            'Lastname': lastname,
-            'FCMToken': fcmToken,
-            'Email': email,
-            'ProfileImage': profileImage,
-          });
+              // Exclude the logged-in user from chat list
+              // if (email != await getUserEmail()) {
+              chats.add({
+                'Key': key,
+                'SenderId': data["SenderId"],
+                'ParticipantId': data["ParticipantId"],
+                'Firstname': firstname,
+                'Lastname': lastname,
+                'FCMToken': fcmToken,
+                'Email': email,
+                'ProfileImage': profileImage,
+              });
+              // }
+            }
+          }
         }
-      }
-    }
-
-    setState(() {
-      filteredChats = List.from(chats);
-    });
+        setState(() {
+          filteredChats = List.from(chats);
+        });
+      },
+    );
   }
 
   Future<void> getUsersByEmail(String query) async {
@@ -121,6 +138,7 @@ class _PersonalCharScreenState extends State<PersonalCharScreen> {
   }
 
   // Filter students based on email input
+
   void filterChats(String query) {
     if (query.isEmpty) {
       setState(() {
@@ -135,6 +153,77 @@ class _PersonalCharScreenState extends State<PersonalCharScreen> {
   void initState() {
     super.initState();
     getChatData(); // Load chat data once when the screen opens
+  }
+
+  Future<void> createChat(
+      String senderID, String participantID, Map chat) async {
+    DatabaseReference dbRefChat =
+        FirebaseDatabase.instance.ref().child('BigtableConnect/tblChat');
+
+    // Query for chats where the logged-in user is either the SenderId or the ParticipantId
+    Query query = dbRefChat.orderByChild('SenderId');
+    query.once().then((snapshot) async {
+      if (snapshot.snapshot.value != null) {
+        Map data = snapshot.snapshot.value as Map;
+
+        // Check for an existing chat where the logged-in user is either the sender or participant
+        for (var key in data.keys) {
+          print("key $key");
+          var chatData = data[key];
+
+          // Check if the logged-in user is the sender or the participant
+          if ((chatData['SenderId'] == senderID &&
+                  chatData['ParticipantId'] == participantID) ||
+              (chatData['SenderId'] == participantID &&
+                  chatData['ParticipantId'] == senderID)) {
+            // If chat exists, navigate to the ChatScreen with the existing chat details
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ChatScreen(
+                  key, // Pass the existing chat data
+                  userKey, // Pass the user key
+                ),
+              ),
+            );
+            return; // Exit once the chat is found and navigation is done
+          }
+        }
+      }
+
+      // If no matching chat was found, create a new chat
+      ChatModel chatModel = ChatModel(senderID, participantID);
+
+      // Push the new chat to Firebase and retrieve the key
+      dbRefChat.push().set(chatModel.toJson()).then((_) {
+        // Now we can retrieve the chat key after the push operation
+        dbRefChat.once().then((DatabaseEvent event) {
+          // Map data = event.snapshot.value as Map;
+          String? newChatID = event.snapshot.key; // Access the key here
+          // print("NewData $data");
+          // Navigate to the ChatScreen with the new chat ID
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ChatScreen(
+                // chatModel.toJson(),
+                // Pass the chat data (as a Map or model)
+                newChatID!, // Pass the newly created chat ID
+                userKey, // Pass the user key
+              ),
+            ),
+          );
+        }).catchError((error) {
+          print("Error retrieving new chat ID: $error");
+        });
+      }).catchError((e) {
+        // Handle any error that occurs while pushing the data
+        print("Error creating new chat: $e");
+      });
+    }).catchError((e) {
+      // Handle any error that occurs during the query or snapshot retrieval
+      print("Error querying chats: $e");
+    });
   }
 
   @override
@@ -226,14 +315,25 @@ class _PersonalCharScreenState extends State<PersonalCharScreen> {
                         itemBuilder: (context, index) {
                           var chat = filteredChats[index];
                           return ListTile(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      ChatScreen(chat['Key'], userKey),
+                                ),
+                              );
+                            },
                             title: Text(
                                 "${chat['Firstname']} ${chat['Lastname']}"),
                             subtitle: Text(chat['Email']),
-                            leading: chat['ProfileImage'] != null
-                                ? CircleAvatar(
-                                    backgroundImage:
-                                        NetworkImage(chat['ProfileImage']))
-                                : const CircleAvatar(child: Icon(Icons.person)),
+                            leading: CircleAvatar(
+                              backgroundImage: chat['ProfileImage'] != null &&
+                                      chat['ProfileImage'].isNotEmpty
+                                  ? NetworkImage(chat['ProfileImage'])
+                                  : const NetworkImage(
+                                      "https://firebasestorage.googleapis.com/v0/b/arogyasair-b7bb5.appspot.com/o/ProfilePicture%2FDefault.webp?alt=media"),
+                            ),
                           );
                         },
                       )
@@ -252,14 +352,19 @@ class _PersonalCharScreenState extends State<PersonalCharScreen> {
                         itemBuilder: (context, index) {
                           var chat = filteredChats[index];
                           return ListTile(
+                            onTap: () {
+                              createChat(userKey, chat['Key'], chat);
+                            },
                             title: Text(
                                 "${chat['Firstname']} ${chat['Lastname']}"),
                             subtitle: Text(chat['Email']),
-                            leading: chat['ProfileImage'] != null
-                                ? CircleAvatar(
-                                    backgroundImage:
-                                        NetworkImage(chat['ProfileImage']))
-                                : const CircleAvatar(child: Icon(Icons.person)),
+                            leading: CircleAvatar(
+                              backgroundImage: chat['ProfileImage'] != null &&
+                                      chat['ProfileImage'].isNotEmpty
+                                  ? NetworkImage(chat['ProfileImage'])
+                                  : const NetworkImage(
+                                      "https://firebasestorage.googleapis.com/v0/b/arogyasair-b7bb5.appspot.com/o/ProfilePicture%2FDefault.webp?alt=media"),
+                            ),
                           );
                         },
                       )

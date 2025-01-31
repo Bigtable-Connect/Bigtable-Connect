@@ -1,4 +1,5 @@
 import 'package:bigtable_connect/screens/personal_chat_screen.dart';
+import 'package:bigtable_connect/services/auth_services.dart';
 import 'package:bigtable_connect/services/notification_service.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
@@ -55,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (profileImage1 != null) {
         profileImage = profileImage1;
       } else {
-        profileImage = "";
+        profileImage = "https://firebasestorage.googleapis.com/v0/b/arogyasair-b7bb5.appspot.com/o/ProfilePicture%2FDefault.webp?alt=media";
       }
       isDataFetched = true;
     });
@@ -114,6 +115,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           color: Colors.black),
                       onPressed: () {
                         print("Notifications tapped");
+                        AuthService().signOut(context: context);
                       },
                     ),
                   ],
