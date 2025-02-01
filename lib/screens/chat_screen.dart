@@ -1,4 +1,5 @@
 import 'package:bigtable_connect/Auth/SharedPreferences.dart';
+import 'package:bigtable_connect/Model/text_model.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
@@ -16,32 +17,49 @@ class _ChatScreenState extends State<ChatScreen> {
   List<Map> chats = [];
   TextEditingController textMessage = TextEditingController();
   late String userKey;
-  late String email;
   final key1 = 'Email';
-  late String firstName;
-  late String lastName;
-  late String userKey1;
-  late String profileImage;
+  late String email, firstname, lastname, fcmToken, profileImage;
   bool isDataFetched = false;
 
   Future<void> loadData() async {
     if (isDataFetched) return;
-    String? userEmail = await getData(key1);
-    String? userFirstName = await getData("FirstName");
-    String? userLastName = await getData("LastName");
-    String? profileImage1 = await getData("ProfileImage");
-    String? userkey = await getKey();
-    setState(() {
-      email = userEmail!;
-      userKey1 = userkey!;
-      firstName = userFirstName!;
-      lastName = userLastName!;
-      if (profileImage1 != null) {
-        profileImage = profileImage1;
+    userKey = (await getKey())!;
+
+    Query dbRef2 = FirebaseDatabase.instance
+        .ref()
+        .child('BigtableConnect/tblChat/${widget.chat}');
+
+    await dbRef2.once().then((documentSnapshot) async {
+      var data = documentSnapshot.snapshot.value as Map;
+      if (data['ParticipantId'] == userKey) {
+        await getUserData(data['SenderId']);
       } else {
-        profileImage = "https://firebasestorage.googleapis.com/v0/b/arogyasair-b7bb5.appspot.com/o/ProfilePicture%2FDefault.webp?alt=media";
+        await getUserData(data['ParticipantId']);
       }
-      isDataFetched = true;
+      // if(data["Email"] != email){
+      // email = data["Email"];
+      // firstname = data["FirstName"];
+      // lastname = data["LastName"];
+      // fcmToken = data["FCMToken"];
+      // profileImage = data["ProfileImage"];
+      // }
+    });
+  }
+
+  Future<void> getUserData(String userKey) async {
+    Query dbRef2 = FirebaseDatabase.instance
+        .ref()
+        .child('BigtableConnect/tblUser/$userKey');
+
+    await dbRef2.once().then((documentSnapshot) async {
+      var data = documentSnapshot.snapshot.value as Map;
+      // if(data["Email"] != email){
+      email = data["Email"];
+      firstname = data["FirstName"];
+      lastname = data["LastName"];
+      fcmToken = data["FCMToken"];
+      profileImage = data["ProfileImage"];
+      // }
     });
   }
 
@@ -53,7 +71,7 @@ class _ChatScreenState extends State<ChatScreen> {
     DataSnapshot snapshot = event.snapshot;
 
     if (snapshot.value != null) {
-      Map<dynamic, dynamic> values = snapshot.value as Map<dynamic, dynamic>;
+      // Map<dynamic, dynamic> values = snapshot.value as Map<dynamic, dynamic>;
       chats.clear();
 
       // for (var entry in values.entries) {
@@ -87,26 +105,17 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> sendMessage() async {
-    print("Send message called");
     var message = textMessage.text;
 
-    Query dbRef2 = FirebaseDatabase.instance
+    DatabaseReference dbRef2 = FirebaseDatabase.instance
         .ref()
-        .child('BigtableConnect/tblChat')
-        .orderByChild("SenderId")
-        .equalTo(email);
+        .child('BigtableConnect/tblText');
 
-    await dbRef2.once().then((documentSnapshot) async {
-      for (var x in documentSnapshot.snapshot.children) {
-        Map data = x.value as Map;
-        print(data);
+    TextModel textModel = TextModel(message, widget.chat.toString(), userKey, DateTime.now().toString());
 
-        if (data['ParticipantId'] != widget.userKey) {
-          return;
-        }
-      }
-    });
+    dbRef2.push().set(textModel.toJson());
 
+    // setState(() {});
     // Text content
     // Class id (from tblClasses) / chat id (from tblChat)
     // Sender id(from tblUser)
@@ -115,108 +124,128 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    loadData();
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF1B4D3E),
-        leadingWidth: MediaQuery.of(context).size.width *
-            0.22, // Adjust width for the back arrow and avatar
-        leading: Row(
-          children: [
-            IconButton(
-              icon: const Icon(Icons.arrow_back_outlined,
-                  color: Color(0xFF9C7945)),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-            CircleAvatar(
-              backgroundImage: profileImage.isNotEmpty
-                  ? NetworkImage(profileImage)
-                  : const NetworkImage(
-                      "https://firebasestorage.googleapis.com/v0/b/arogyasair-b7bb5.appspot.com/o/ProfilePicture%2FDefault.webp?alt=media"),
-              backgroundColor: const Color(0xFF9C7945),
-            ),
-          ],
-        ),
-        title: GestureDetector(
-          onTap: () {
-            // Navigator.push(
-            //   context,
-            //   MaterialPageRoute(
-            //     builder: (context) => ChatScreen(widget.chat),
-            //   ),
-            // );
-          },
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                "$firstName $lastName",
-                style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF9C7945)),
-                overflow: TextOverflow.ellipsis,
-              ),
-              Text(
-                email,
-                style: const TextStyle(fontSize: 14, color: Color(0xFF9C7945)),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        ),
-      ),
-      body: Column(
-        children: [
-          FutureBuilder(
-            builder: (context, snapshot) {
-              return const SingleChildScrollView(
-                child: Column(
-                  children: [],
-                ),
-              );
-            },
-            future: null,
-          ),
-          const Spacer(),
-          Padding(
-            padding: const EdgeInsets.all(10),
-            child: Container(
-              decoration: BoxDecoration(
-                color: const Color(0xFF1B4D3E),
-                borderRadius: BorderRadius.circular(50),
-              ),
-              height: MediaQuery.of(context).size.height * 0.075,
-              child: TextField(
-                controller: textMessage,
-                decoration: InputDecoration(
-                  border: const OutlineInputBorder(
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(50),
+    return FutureBuilder(
+      future: loadData(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          if (firstname.isNotEmpty) {
+            return Scaffold(
+              appBar: AppBar(
+                backgroundColor: const Color(0xFF1B4D3E),
+                leadingWidth: MediaQuery.of(context).size.width *
+                    0.22, // Adjust width for the back arrow and avatar
+                leading: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back_outlined,
+                          color: Color(0xFF9C7945)),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
                     ),
+                    CircleAvatar(
+                      backgroundImage: profileImage.isNotEmpty
+                          ? NetworkImage(profileImage)
+                          : const NetworkImage(
+                              "https://firebasestorage.googleapis.com/v0/b/arogyasair-b7bb5.appspot.com/o/ProfilePicture%2FDefault.webp?alt=media"),
+                      backgroundColor: const Color(0xFF9C7945),
+                    ),
+                  ],
+                ),
+                title: GestureDetector(
+                  onTap: () {
+                    // Navigator.push(
+                    //   context,
+                    //   MaterialPageRoute(
+                    //     builder: (context) => ChatScreen(widget.chat),
+                    //   ),
+                    // );
+                  },
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "$firstname $lastname",
+                        style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF9C7945)),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        email,
+                        style: const TextStyle(
+                            fontSize: 14, color: Color(0xFF9C7945)),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ),
-                  suffixIcon: IconButton(
-                    onPressed: () async {
-                      await sendMessage();
+                ),
+              ),
+              body: Column(
+                children: [
+                  FutureBuilder(
+                    builder: (context, snapshot) {
+                      return const SingleChildScrollView(
+                        child: Column(
+                          children: [],
+                        ),
+                      );
                     },
-                    icon: const Icon(
-                      Icons.send,
-                      color: Color(0xFF9C7945),
-                    ),
+                    future: null,
                   ),
-                  hintText: "Type...",
-                  hintStyle: const TextStyle(color: Color(0xFF9C7945)),
-                ),
-                style: const TextStyle(
-                    color: Color(0xFF9C7945), fontWeight: FontWeight.bold),
+                  const Spacer(),
+                  Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1B4D3E),
+                        borderRadius: BorderRadius.circular(50),
+                      ),
+                      height: MediaQuery.of(context).size.height * 0.075,
+                      child: TextField(
+                        controller: textMessage,
+                        decoration: InputDecoration(
+                          border: const OutlineInputBorder(
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(50),
+                            ),
+                          ),
+                          suffixIcon: IconButton(
+                            onPressed: () async {
+                              await sendMessage();
+                            },
+                            icon: const Icon(
+                              Icons.send,
+                              color: Color(0xFF9C7945),
+                            ),
+                          ),
+                          hintText: "Type...",
+                          hintStyle: const TextStyle(color: Color(0xFF9C7945)),
+                        ),
+                        style: const TextStyle(
+                            color: Color(0xFF9C7945),
+                            fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  )
+                ],
               ),
+            );
+          } else {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+        } else {
+          return const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
             ),
-          )
-        ],
-      ),
+          );
+        }
+      },
     );
   }
 }

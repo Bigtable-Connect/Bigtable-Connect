@@ -1,6 +1,7 @@
 import 'package:bigtable_connect/screens/chat_screen.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../Auth/SharedPreferences.dart';
@@ -158,71 +159,62 @@ class _PersonalCharScreenState extends State<PersonalCharScreen> {
   Future<void> createChat(
       String senderID, String participantID, Map chat) async {
     DatabaseReference dbRefChat =
-        FirebaseDatabase.instance.ref().child('BigtableConnect/tblChat');
+    FirebaseDatabase.instance.ref().child('BigtableConnect/tblChat');
 
-    // Query for chats where the logged-in user is either the SenderId or the ParticipantId
+    // Query for existing chat
     Query query = dbRefChat.orderByChild('SenderId');
     query.once().then((snapshot) async {
       if (snapshot.snapshot.value != null) {
         Map data = snapshot.snapshot.value as Map;
 
-        // Check for an existing chat where the logged-in user is either the sender or participant
         for (var key in data.keys) {
-          print("key $key");
           var chatData = data[key];
 
-          // Check if the logged-in user is the sender or the participant
           if ((chatData['SenderId'] == senderID &&
-                  chatData['ParticipantId'] == participantID) ||
+              chatData['ParticipantId'] == participantID) ||
               (chatData['SenderId'] == participantID &&
                   chatData['ParticipantId'] == senderID)) {
-            // If chat exists, navigate to the ChatScreen with the existing chat details
+            // Chat exists, navigate to chat screen
             Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) => ChatScreen(
-                  key, // Pass the existing chat data
-                  userKey, // Pass the user key
+                  key, // Existing chat key
+                  userKey, // User key
                 ),
               ),
             );
-            return; // Exit once the chat is found and navigation is done
+            return;
           }
         }
       }
 
-      // If no matching chat was found, create a new chat
+      // If no existing chat, create a new chat
+      DatabaseReference newChatRef = dbRefChat.push(); // Generates a unique key
+      String newChatID = newChatRef.key!; // Store the generated key
+
       ChatModel chatModel = ChatModel(senderID, participantID);
 
-      // Push the new chat to Firebase and retrieve the key
-      dbRefChat.push().set(chatModel.toJson()).then((_) {
-        // Now we can retrieve the chat key after the push operation
-        dbRefChat.once().then((DatabaseEvent event) {
-          // Map data = event.snapshot.value as Map;
-          String? newChatID = event.snapshot.key; // Access the key here
-          // print("NewData $data");
-          // Navigate to the ChatScreen with the new chat ID
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ChatScreen(
-                // chatModel.toJson(),
-                // Pass the chat data (as a Map or model)
-                newChatID!, // Pass the newly created chat ID
-                userKey, // Pass the user key
-              ),
+      newChatRef.set(chatModel.toJson()).then((_) {
+        // Navigate using the new chat ID
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ChatScreen(
+              newChatID, // Pass the newly created chat ID
+              userKey, // Pass the user key
             ),
-          );
-        }).catchError((error) {
-          print("Error retrieving new chat ID: $error");
-        });
+          ),
+        );
       }).catchError((e) {
-        // Handle any error that occurs while pushing the data
-        print("Error creating new chat: $e");
+        if (kDebugMode) {
+          print("Error creating new chat: $e");
+        }
       });
     }).catchError((e) {
-      // Handle any error that occurs during the query or snapshot retrieval
-      print("Error querying chats: $e");
+      if (kDebugMode) {
+        print("Error querying chats: $e");
+      }
     });
   }
 
