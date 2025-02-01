@@ -1,7 +1,12 @@
+import 'dart:io';
+
 import 'package:bigtable_connect/Auth/SharedPreferences.dart';
 import 'package:bigtable_connect/Model/text_model.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_pdfview/flutter_pdfview.dart'; // Add flutter_pdfview package
+import 'package:intl/intl.dart';
 
 class ChatScreen extends StatefulWidget {
   final String chat;
@@ -20,6 +25,9 @@ class _ChatScreenState extends State<ChatScreen> {
   final key1 = 'Email';
   late String email, firstname, lastname, fcmToken, profileImage;
   bool isDataFetched = false;
+  FilePickerResult? result;
+  String? fileType;
+  String? filePathPreview;
 
   Future<void> loadData() async {
     if (isDataFetched) return;
@@ -36,14 +44,8 @@ class _ChatScreenState extends State<ChatScreen> {
       } else {
         await getUserData(data['ParticipantId']);
       }
-      // if(data["Email"] != email){
-      // email = data["Email"];
-      // firstname = data["FirstName"];
-      // lastname = data["LastName"];
-      // fcmToken = data["FCMToken"];
-      // profileImage = data["ProfileImage"];
-      // }
     });
+    getChatData();
   }
 
   Future<void> getUserData(String userKey) async {
@@ -53,73 +55,127 @@ class _ChatScreenState extends State<ChatScreen> {
 
     await dbRef2.once().then((documentSnapshot) async {
       var data = documentSnapshot.snapshot.value as Map;
-      // if(data["Email"] != email){
       email = data["Email"];
       firstname = data["FirstName"];
       lastname = data["LastName"];
       fcmToken = data["FCMToken"];
-      profileImage = data["ProfileImage"];
-      // }
+      profileImage = data['ProfileImage'] == ""
+          ? "https://firebasestorage.googleapis.com/v0/b/arogyasair-b7bb5.appspot.com/o/ProfilePicture%2FDefault.webp?alt=media"
+          : data["ProfileImage"];
     });
   }
 
-  Future<void> getChatData() async {
-    // userKey = (await getKey())!;
-    DatabaseReference dbRef =
-        FirebaseDatabase.instance.ref().child('BigtableConnect/tblText');
-    DatabaseEvent event = await dbRef.once();
-    DataSnapshot snapshot = event.snapshot;
+  void getChatData() {
+    Query dbRefChatText = FirebaseDatabase.instance
+        .ref()
+        .child("BigtableConnect/tblText")
+        .orderByChild("Class_or_ChatId")
+        .equalTo(widget.chat);
 
-    if (snapshot.value != null) {
-      // Map<dynamic, dynamic> values = snapshot.value as Map<dynamic, dynamic>;
+    dbRefChatText.onValue.listen((event) {
       chats.clear();
+      for (var i in event.snapshot.children) {
+        Map data = i.value as Map;
+        getUserData(data['SenderId']);
 
-      // for (var entry in values.entries) {
-      //   var key = entry.key;
-      //   var value = entry.value;
-      //   participantId = value["SenderId"] == userKey
-      //       ? value["ParticipantId"]
-      //       : value["SenderId"];
-      //
-      //   await getUserData(participantId);
-      //
-      //   // Exclude the logged-in user from chat list
-      //   if (email != await getUserEmail()) {
-      //     chats.add({
-      //       'Key': key,
-      //       'SenderId': value["SenderId"],
-      //       'ParticipantId': value["ParticipantId"],
-      //       'Firstname': firstname,
-      //       'Lastname': lastname,
-      //       'FCMToken': fcmToken,
-      //       'Email': email,
-      //       'ProfileImage': profileImage,
-      //     });
-      //   }
-      // }
+        // Parse and format the date-time
+        String formattedDateTime = "";
+        try {
+          DateTime dateTime = DateTime.parse(data['DateTimeOfMessage']);
+          formattedDateTime = DateFormat('hh:mm a | dd-MM-yy').format(dateTime);
+        } catch (e) {
+          formattedDateTime = data['DateTimeOfMessage']; // Fallback
+        }
+
+        if (data['SenderId'] == userKey) {
+          chats.add({
+            'TextContent': data['TextContent'],
+            'DateTimeOfMessage': formattedDateTime,
+            'SenderId': data['SenderId'],
+            'Class_or_ChatId': data['Class_or_ChatId'],
+            'Email': email,
+            'Name': "You",
+            'FcmToken': fcmToken,
+            'ProfileImage': profileImage
+          });
+        } else {
+          chats.add({
+            'TextContent': data['TextContent'],
+            'DateTimeOfMessage': formattedDateTime,
+            'SenderId': data['SenderId'],
+            'Class_or_ChatId': data['Class_or_ChatId'],
+            'Email': email,
+            'Name': "$firstname $lastname",
+            'FcmToken': fcmToken,
+            'ProfileImage': profileImage
+          });
+        }
+      }
+      setState(() {}); // This ensures UI refreshes
+    });
+    isDataFetched = true;
+  }
+
+  Future<void> pickFile() async {
+    result = await FilePicker.platform.pickFiles();
+
+    if (result != null) {
+      String filePath = result!.files.single.path!;
+      String fileName = result!.files.single.name;
+
+      // Checking file type based on extension
+      String extension = fileName.split('.').last.toLowerCase();
+
+      // Logic to handle file preview
+      if (extension == 'pdf') {
+        // Handle PDF Preview
+        setState(() {
+          fileType = 'pdf';
+          filePathPreview = filePath;
+        });
+      } else if (extension == 'jpg' ||
+          extension == 'jpeg' ||
+          extension == 'png') {
+        // Handle Image Preview
+        setState(() {
+          fileType = 'image';
+          filePathPreview = filePath;
+        });
+      } else if (extension == 'ppt' || extension == 'pptx') {
+        // Handle PPT Preview
+        setState(() {
+          fileType = 'ppt';
+          filePathPreview = filePath;
+        });
+      } else if (extension == 'doc' || extension == 'docx') {
+        // Handle DOC Preview
+        setState(() {
+          fileType = 'doc';
+          filePathPreview = filePath;
+        });
+      } else {
+        // Handle Other File Types
+        setState(() {
+          fileType = 'other';
+          filePathPreview = filePath;
+        });
+      }
     }
 
-    // setState(() {
-    //   filteredChats = List.from(chats);
-    // });
+    setState(() {});
   }
 
   Future<void> sendMessage() async {
     var message = textMessage.text;
+    DatabaseReference dbRef2 =
+        FirebaseDatabase.instance.ref().child('BigtableConnect/tblText');
 
-    DatabaseReference dbRef2 = FirebaseDatabase.instance
-        .ref()
-        .child('BigtableConnect/tblText');
-
-    TextModel textModel = TextModel(message, widget.chat.toString(), userKey, DateTime.now().toString());
+    TextModel textModel = TextModel(message, widget.chat.toString(), "",
+        userKey, DateTime.now().toString());
 
     dbRef2.push().set(textModel.toJson());
 
-    // setState(() {});
-    // Text content
-    // Class id (from tblClasses) / chat id (from tblChat)
-    // Sender id(from tblUser)
-    // Date and time
+    textMessage.clear();
   }
 
   @override
@@ -130,10 +186,10 @@ class _ChatScreenState extends State<ChatScreen> {
         if (snapshot.connectionState == ConnectionState.done) {
           if (firstname.isNotEmpty) {
             return Scaffold(
+              resizeToAvoidBottomInset: true,
               appBar: AppBar(
                 backgroundColor: const Color(0xFF1B4D3E),
-                leadingWidth: MediaQuery.of(context).size.width *
-                    0.22, // Adjust width for the back arrow and avatar
+                leadingWidth: MediaQuery.of(context).size.width * 0.22,
                 leading: Row(
                   children: [
                     IconButton(
@@ -144,92 +200,176 @@ class _ChatScreenState extends State<ChatScreen> {
                       },
                     ),
                     CircleAvatar(
-                      backgroundImage: profileImage.isNotEmpty
-                          ? NetworkImage(profileImage)
-                          : const NetworkImage(
-                              "https://firebasestorage.googleapis.com/v0/b/arogyasair-b7bb5.appspot.com/o/ProfilePicture%2FDefault.webp?alt=media"),
+                      backgroundImage: NetworkImage(profileImage),
                       backgroundColor: const Color(0xFF9C7945),
                     ),
                   ],
                 ),
-                title: GestureDetector(
-                  onTap: () {
-                    // Navigator.push(
-                    //   context,
-                    //   MaterialPageRoute(
-                    //     builder: (context) => ChatScreen(widget.chat),
-                    //   ),
-                    // );
-                  },
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "$firstname $lastname",
-                        style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF9C7945)),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Text(
-                        email,
-                        style: const TextStyle(
-                            fontSize: 14, color: Color(0xFF9C7945)),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
+                title: Text(
+                  "$firstname $lastname",
+                  style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF9C7945)),
+                  overflow: TextOverflow.ellipsis,
                 ),
+                actions: [
+                  IconButton(
+                    icon:
+                        const Icon(Icons.attach_file, color: Color(0xFF9C7945)),
+                    onPressed: () async {
+                      await pickFile();
+                    },
+                  ),
+                ],
               ),
               body: Column(
                 children: [
-                  FutureBuilder(
-                    builder: (context, snapshot) {
-                      return const SingleChildScrollView(
-                        child: Column(
-                          children: [],
+                  Expanded(
+                    child: SingleChildScrollView(
+                      reverse: true,
+                      child: Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          physics: const BouncingScrollPhysics(),
+                          itemCount: chats.length,
+                          itemBuilder: (context, index) {
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: Row(
+                                children: [
+                                  CircleAvatar(
+                                    backgroundImage: NetworkImage(
+                                        chats[index]['ProfileImage']),
+                                    maxRadius: 25,
+                                  ),
+                                  SizedBox(
+                                      width: MediaQuery.of(context).size.width *
+                                          0.02),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Text(
+                                              chats[index]['Name'],
+                                              style:
+                                                  const TextStyle(fontSize: 12),
+                                            ),
+                                            SizedBox(
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  0.02,
+                                            ),
+                                            Text(
+                                              chats[index]['DateTimeOfMessage'],
+                                              style:
+                                                  const TextStyle(fontSize: 11),
+                                            )
+                                          ],
+                                        ),
+                                        Text(
+                                          chats[index]['TextContent'],
+                                          style: const TextStyle(fontSize: 18),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
                         ),
-                      );
-                    },
-                    future: null,
+                      ),
+                    ),
                   ),
-                  const Spacer(),
                   Padding(
-                    padding: const EdgeInsets.all(10),
+                    padding:
+                        const EdgeInsets.only(bottom: 10, right: 10, left: 10),
                     child: Container(
                       decoration: BoxDecoration(
                         color: const Color(0xFF1B4D3E),
                         borderRadius: BorderRadius.circular(50),
                       ),
-                      height: MediaQuery.of(context).size.height * 0.075,
-                      child: TextField(
-                        controller: textMessage,
-                        decoration: InputDecoration(
-                          border: const OutlineInputBorder(
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(50),
+                      height: MediaQuery.of(context).size.height * 0.075 +
+                          (result != null
+                              ? MediaQuery.of(context).size.height * 0.34
+                              : 0), // Adjust height based on file
+                      child: Column(
+                        children: [
+                          if (result != null)
+                            // Preview the file based on type
+                            if (fileType == 'pdf')
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: SizedBox(
+                                  height: MediaQuery.of(context).size.height * 0.3,
+                                  width: MediaQuery.of(context).size.width * 0.8,
+                                  child: PDFView(
+                                    filePath: filePathPreview,
+                                  ),
+                                ),
+                              )
+                            else if (fileType == 'image')
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Image.file(
+                                  File(filePathPreview!),
+                                  height: MediaQuery.of(context).size.height * 0.3,
+                                  fit: BoxFit.cover,
+                                ),
+                              )
+                            else if (fileType == 'ppt')
+                              const Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Icon(Icons.slideshow,
+                                    size: 100, color: Colors.white),
+                              )
+                            else if (fileType == 'doc')
+                              const Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Icon(Icons.document_scanner,
+                                    size: 100, color: Colors.white),
+                              )
+                            else
+                              const Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Icon(Icons.attach_file,
+                                    size: 100, color: Colors.white),
+                              ),
+                          TextField(
+                            controller: textMessage,
+                            textInputAction: TextInputAction.send,
+                            decoration: InputDecoration(
+                              contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 18, horizontal: 20),
+                              border: InputBorder.none,
+                              suffixIcon: IconButton(
+                                onPressed: () async {
+                                  await sendMessage();
+                                },
+                                icon: const Icon(
+                                  Icons.send,
+                                  color: Color(0xFF9C7945),
+                                ),
+                              ),
+                              hintText: "Type...",
+                              hintStyle:
+                                  const TextStyle(color: Color(0xFF9C7945)),
                             ),
-                          ),
-                          suffixIcon: IconButton(
-                            onPressed: () async {
-                              await sendMessage();
-                            },
-                            icon: const Icon(
-                              Icons.send,
+                            style: const TextStyle(
                               color: Color(0xFF9C7945),
+                              fontWeight: FontWeight.bold,
                             ),
-                          ),
-                          hintText: "Type...",
-                          hintStyle: const TextStyle(color: Color(0xFF9C7945)),
-                        ),
-                        style: const TextStyle(
-                            color: Color(0xFF9C7945),
-                            fontWeight: FontWeight.bold),
+                          )
+                        ],
                       ),
                     ),
-                  )
+                  ),
                 ],
               ),
             );

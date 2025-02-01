@@ -11,8 +11,8 @@ class MediaModel{
   Map<dynamic, dynamic> toJson()=> <dynamic, dynamic>{
     'MediaName': mediaName,
     'MediaType': mediaType,
-    'Class/ChatId': classId,
-    'OwnerId': uploaderId,
+    'Class_or_ChatId': classId,
+    'UploaderId': uploaderId,
     'DateTimeOfUploading': dateTime
   };
 }
