@@ -73,13 +73,13 @@ class _HomeScreenState extends State<HomeScreen> {
             if (firstName.isNotEmpty) {
               return Scaffold(
                 appBar: AppBar(
-                  backgroundColor: Colors.transparent,
+                  backgroundColor: const Color(0xFF1B4D3E),
                   elevation: 0,
                   title: Row(
                     children: [
                       Container(
                         decoration: const BoxDecoration(
-                          color: Colors.white10,
+                          color: Color(0xFF9C7945),
                           shape: BoxShape.circle, // Use circle shape
                         ),
                         child: ClipOval(
@@ -101,10 +101,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         children: [
                           Text("Hello, $firstName",
                               style: const TextStyle(
-                                  color: Colors.black, fontSize: 18)),
+                                  color: Colors.white, fontSize: 18)),
                           const Text("Discover your courses right away",
                               style:
-                                  TextStyle(color: Colors.grey, fontSize: 14)),
+                                  TextStyle(color: Colors.white, fontSize: 14)),
                         ],
                       )
                     ],
@@ -112,7 +112,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   actions: [
                     IconButton(
                       icon: const Icon(Icons.notifications_outlined,
-                          color: Colors.black),
+                          color: Colors.white),
                       onPressed: () {
                         print("Notifications tapped");
                         AuthService().signOut(context: context);

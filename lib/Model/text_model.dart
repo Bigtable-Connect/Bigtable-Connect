@@ -1,7 +1,7 @@
 class TextModel{
   late String textContent;
   late String classId;
-  late String mediaId;
+  late String? mediaId;
   late String senderId;
   late String dateTime;
 

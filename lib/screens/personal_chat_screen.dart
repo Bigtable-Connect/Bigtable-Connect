@@ -55,7 +55,7 @@ class _PersonalCharScreenState extends State<PersonalCharScreen> {
                 'ProfileImage': profileImage,
               });
               // }
-            } else {
+            } else if(data['SenderId'] == userKey) {
               participantId = data["ParticipantId"];
 
               await getUserData(participantId);

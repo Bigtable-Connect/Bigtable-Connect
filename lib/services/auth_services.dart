@@ -43,10 +43,12 @@ class AuthService {
           var lastName = name[1];
           var contact = userCredential.user!.phoneNumber;
           var email = userCredential.user!.email;
-          var profileImage = userCredential.user!.photoURL;
+          var profileImage = userCredential.user!.photoURL ??
+              "https://firebasestorage.googleapis.com/v0/b/arogyasair-b7bb5.appspot.com/o/ProfilePicture%2FDefault.webp?alt=media";
           await saveData('FirstName', firstName);
           await saveData('LastName', lastName);
           await saveData('Email', email);
+          await saveData('ProfileImage', profileImage);
           DatabaseReference dbRefTblUser =
               FirebaseDatabase.instance.ref().child('BigtableConnect/tblUser');
           RegistrationModel regobj = RegistrationModel(
@@ -56,9 +58,16 @@ class AuthService {
             contact ?? "",
             '',
             fcmToken,
-            profileImage ?? "https://www.istockphoto.com/photos/user-profile-image",
+            profileImage,
           );
           dbRefTblUser.push().set(regobj.toJson());
+          Navigator.pop(context);
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const HomeScreen(),
+            ),
+          );
           // await saveKey(key);
         } else {
           dbRef2 = FirebaseDatabase.instance
@@ -76,7 +85,12 @@ class AuthService {
               var firstName = data["FirstName"];
               var lastName = data["LastName"];
               var email = data["Email"];
-              var profileImage = data["ProfileImage"];
+              var profileImage = "";
+              if (data["ProfileImage"] == "") {
+                profileImage = "https://firebasestorage.googleapis.com/v0/b/arogyasair-b7bb5.appspot.com/o/ProfilePicture%2FDefault.webp?alt=media";
+              } else {
+                profileImage = data["ProfileImage"];
+              }
               if (FCMToken == "") {
                 final updatedData = {"FCMToken": fcmToken};
                 final userRef = FirebaseDatabase.instance
@@ -90,7 +104,6 @@ class AuthService {
                   await saveData('Email', email);
                   await saveData('ProfileImage', profileImage);
                   await saveKey(key);
-                  Navigator.pop(context);
                   Navigator.pop(context);
                   Navigator.push(
                     context,
@@ -133,7 +146,6 @@ class AuthService {
                 await saveData('Email', email);
                 await saveData('ProfileImage', profileImage);
                 await saveKey(key);
-                Navigator.pop(context);
                 Navigator.pop(context);
                 Navigator.push(
                   context,
@@ -183,7 +195,8 @@ class AuthService {
       );
       dbRefTblUser.push().set(regobj.toJson());
       Navigator.pop(context);
-      Navigator.push(context, MaterialPageRoute(builder: (context)=>const LoginPage()));
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => const LoginPage()));
     } on FirebaseAuthException catch (e) {
       String message = "";
       if (e.code == 'weak-password') {
@@ -219,31 +232,30 @@ class AuthService {
           .signInWithEmailAndPassword(email: email, password: password);
 
       if (email == "programmerprodigies@gmail.com") {
-        dbRef2 = FirebaseDatabase.instance
-            .ref()
-            .child('BigtableConnect/tblUser')
-            .orderByChild("Email")
-            .equalTo(email);
-        Map data;
-        await dbRef2.once().then((documentSnapshot) async {
-          for (var x in documentSnapshot.snapshot.children) {
-            String? key = x.key;
-            data = x.value as Map;
-            if (data["Email"] == email) {
-              await saveData('email', data["Email"]);
-              await saveKey(key);
-              Navigator.pop(context);
-              Navigator.pop(context);
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const LoginPage()));
-            }
-          }
-        });
-        await saveData("AdminEmail", email);
-        Navigator.pop(context);
-        Navigator.pop(context);
-        Navigator.push(context,
-            MaterialPageRoute(builder: (scaffoldContext) => const LoginPage()));
+        // dbRef2 = FirebaseDatabase.instance
+        //     .ref()
+        //     .child('BigtableConnect/tblUser')
+        //     .orderByChild("Email")
+        //     .equalTo(email);
+        // Map data;
+        // await dbRef2.once().then((documentSnapshot) async {
+        //   for (var x in documentSnapshot.snapshot.children) {
+        //     String? key = x.key;
+        //     data = x.value as Map;
+        //     if (data["Email"] == email) {
+        //       await saveData('email', data["Email"]);
+        //       await saveKey(key);
+        //       Navigator.pop(context);
+        //       Navigator.pop(context);
+        //       Navigator.push(context,
+        //           MaterialPageRoute(builder: (context) => const LoginPage()));
+        //     }
+        //   }
+        // });
+        // await saveData("AdminEmail", email);
+        // Navigator.pop(context);
+        // Navigator.push(context,
+        //     MaterialPageRoute(builder: (scaffoldContext) => const LoginPage()));
       } else {
         dbRef2 = FirebaseDatabase.instance
             .ref()

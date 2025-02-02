@@ -3,7 +3,7 @@ class MediaModel{
   late String mediaType;
   late String classId;
   late String uploaderId;
-  late DateTime dateTime;
+  late String dateTime;
 
   MediaModel(this.mediaName, this.mediaType, this.classId, this.uploaderId,
       this.dateTime);
